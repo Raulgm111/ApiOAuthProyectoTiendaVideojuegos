@@ -18,351 +18,101 @@ namespace ApiOAuthProyectoTiendaVideojuegos.Controllers
         {
             this.repo = repo;
         }
+
         [HttpGet]
         [Route("[action]")]
-        public ActionResult<List<Producto>> BuscarProductos(string buscar)
+        public ActionResult<List<Producto>> GetProductosPS4()
+        {
+            return this.repo.GetProductosPS4();
+        }
+
+        [HttpGet]
+        [Route("[action]")]
+        public ActionResult<List<Producto>> GetProductosPS5()
+        {
+            return this.repo.GetProductosPS5();
+        }
+
+        [HttpGet]
+        [Route("[action]")]
+        public ActionResult<List<Producto>> GetTazas()
+        {
+            return this.repo.GetTazas();
+        }
+
+        [HttpGet]
+        [Route("[action]")]
+        public ActionResult<List<Categoria>> GetCategorias()
+        {
+            return this.repo.GetCategorias();
+        }
+
+        [HttpGet]
+        [Route("[action]")]
+        public ActionResult<List<SubCategoria>> GetSubCategorias()
+        {
+            return this.repo.GetSubCategorias();
+        }
+
+        [HttpGet]
+        [Route("[action]/{id}")]
+        public ActionResult<List<Producto>> GetPorductosGrid(int id)
+        {
+            return this.repo.GetPorductosGrid(id);
+        }
+
+        [HttpGet]
+        [Route("[action]")]
+        public ActionResult<List<Producto>> GetTodosProductos()
+        {
+            return this.repo.GetTodosProductos();
+        }
+
+        [HttpGet]
+        [Route("[action]/{buscar}")]
+        public ActionResult<List<Producto>> GetBuscadorProductos(string buscar)
         {
             return this.repo.GetBuscadorProductos(buscar);
         }
+
+        [HttpGet]
+        [Route("[action]/{idproducto}")]
+        public ActionResult<Producto> DetallesProductos(int idproducto)
+        {
+            return this.repo.DetallesProductos(idproducto);
+        }
+
         [HttpGet]
         [Route("[action]")]
-        [Authorize]
-        public ActionResult MostrarPedidos(int idcliente)
+        //[Authorize]
+        public ActionResult<List<Producto>> BuscarProductoCarrito([FromQuery] List<int>? idproductoCarrito)
         {
-            List<DetallesPedido> pedidos = this.repo.MostrarPedidos(idcliente);
-            return Ok(pedidos);
+            return this.repo.BuscarProductoCarrito(idproductoCarrito);
         }
 
-        [HttpPost]
-        [Route("[action]")]
-        [Authorize]
-        public ActionResult Pedidos()
-        {
-            List<int> carrito = HttpContext.Session.GetObject<List<int>>("CARRITO");
-            int idCliente = int.Parse(HttpContext.User.FindFirst("IdCliente").Value);
-
-            List<Producto> productos = this.repo.BuscarProductoCarrito(carrito);
-
-            int precioTotal = productos.Sum(p => p.Precio);
-
-            this.repo.AgregarPedido(productos, idCliente, precioTotal, carrito);
-
-            HttpContext.Session.Remove("CARRITO");
-
-            return RedirectToAction("MostrarPedidos", new { idcliente = idCliente });
-
-        }
-
-        //[AuthorizeClientes]
         [HttpGet]
         [Route("[action]")]
-        [Authorize]
-        public ActionResult Favoritos(int? idproductoFav, int? ideliminar)
+        //[Authorize]
+        public ActionResult<List<Producto>> BuscarProductoFavorito( [FromQuery] List<int> idproductoFav)
         {
-            List<int> favoritos = HttpContext.Session.GetObject<List<int>>("FAVORITO");
-            if (favoritos == null)
-            {
-                return Ok();
-            }
-            else
-            {
-                if (ideliminar != null)
-                {
-                    favoritos.Remove(ideliminar.Value);
-                    if (favoritos.Count == 0)
-                    {
-                        HttpContext.Session.Remove("FAVORITO");
-                    }
-                    else
-                    {
-                        if (idproductoFav != null)
-                        {
-                            favoritos.Remove(idproductoFav.Value);
-                            HttpContext.Session.SetObject("FAVORITO", favoritos);
-                        }
-                    }
-                }
-                List<Producto> productos = this.repo.BuscarProductoFavorito(favoritos);
-                return Ok(productos);
-            }
+            return this.repo.BuscarProductoFavorito(idproductoFav);
         }
 
-        //[AuthorizeClientes(Policy = "AdminOnly")]
-        [HttpGet]
-        [Route("[action]")]
-        public ActionResult GetProductosAdmin()
-        {
-            List<Producto> productos =
-                 this.repo.GetTodosProductos();
-            return Ok(productos);
-        }
-
-        //[AuthorizeClientes(Policy = "AdminOnly")]
         [HttpDelete]
-        [Route("[action]")]
-        public ActionResult DeleteProducto(int ididproducto)
+        [Route("[action]/{idproducto}")]
+        //[Authorize]
+        public void DeleteProductos(int idproducto)
         {
-            Producto producto =
-                 this.repo.DetallesProductos(ididproducto);
-            return Ok(producto);
+            this.repo.DeleteProductos(idproducto);
         }
 
-        //[AuthorizeClientes(Policy = "AdminOnly")]
-        [HttpDelete]
+        [HttpPut]
         [Route("[action]")]
-        public ActionResult EliminarProducto(int ididproducto)
-        {
-            this.repo.DeleteProductos(ididproducto);
-            return RedirectToAction("GetProductosAdmin");
-        }
-
-        //[AuthorizeClientes(Policy = "AdminOnly")]
-        [HttpGet]
-        [Route("[action]")]
-        public ActionResult EditarProdAdmin(int idproducto)
-        {
-            Producto porducto = this.repo.DetallesProductos(idproducto);
-            return Ok(porducto);
-        }
-
-        //[AuthorizeClientes(Policy = "AdminOnly")]
-        [HttpPost]
-        [Route("[action]")]
-        public ActionResult EditarProdAdmin(Producto producto)
+        //[Authorize]
+        public void UpdatePorducto(Producto producto)
         {
             this.repo.UpdatePorducto(producto);
-            return RedirectToAction("GetProductosAdmin");
         }
 
-        #region VISTAS COMPLETAS
-        [HttpGet]
-        [Route("[action]")]
-        public ActionResult VistasGridTodosProductos([FromQuery] List<string> plataforma,
-            [FromQuery] List<string> generos, int? precioMinimo, int? precioMaximo, int? idproductoCarrito)
-        {
-            CategoriasViewModel enlace = new CategoriasViewModel();
-            enlace.Categorias = this.repo.GetCategorias();
-            enlace.Subcategorias = this.repo.GetSubCategorias();
-
-            if (plataforma != null && plataforma.Any())
-            {
-                enlace.Productos = this.repo.FiltrarPorPlataforma(plataforma);
-            }
-            else if (generos != null && generos.Any())
-            {
-                enlace.Productos = this.repo.FiltrarPorGenero(generos);
-            }
-            else
-            {
-                enlace.Productos = this.repo.GetTodosProductos();
-            }
-
-            if (precioMinimo.HasValue && precioMaximo.HasValue)
-            {
-                enlace.Productos = enlace.Productos.Where(p => p.Precio >= precioMinimo.Value && p.Precio <= precioMaximo.Value).ToList();
-            }
-
-            return Ok(enlace);
-        }
-
-        [HttpGet]
-        [Route("[action]")]
-        public ActionResult VistasGrid(int id, [FromQuery] List<string> plataforma,
-            [FromQuery] List<string> generos, int? precioMinimo, int? precioMaximo)
-        {
-            CategoriasViewModel enlace = new CategoriasViewModel();
-            enlace.Categorias = this.repo.GetCategorias();
-            enlace.Subcategorias = this.repo.GetSubCategorias();
-            enlace.Productos = this.repo.GetPorductosGrid(id);
-            if (plataforma != null && plataforma.Any())
-            {
-                enlace.Productos = this.repo.FiltrarPorPlataforma(plataforma);
-            }
-            else if (generos != null && generos.Any())
-            {
-                enlace.Productos = this.repo.FiltrarPorGenero(generos);
-            }
-
-            if (precioMinimo.HasValue && precioMaximo.HasValue)
-            {
-                enlace.Productos = enlace.Productos.Where(p => p.Precio >= precioMinimo.Value && p.Precio <= precioMaximo.Value).ToList();
-            }
-            return Ok(enlace);
-        }
-        [HttpGet]
-        [Route("[action]")]
-        public ActionResult MisVistas(string nombre)
-        {
-            CategoriasViewModel enlace = new CategoriasViewModel();
-            enlace.Categorias = this.repo.GetCategorias();
-            enlace.ProductosPS4 = this.repo.GetProductosPS4();
-            enlace.ProductosPS5 = this.repo.GetProductosPS5();
-            enlace.Tazas = this.repo.GetTazas();
-            enlace.Subcategorias = this.repo.GetSubCategorias();
-            return Ok(enlace);
-        }
-        [HttpGet]
-        [Route("[action]")]
-        public ActionResult VistasDetalles(int idproducto, int? idproductoAñadir, int? idproductoAñadirFav)
-        {
-            CategoriasViewModel enlace = new CategoriasViewModel();
-            enlace.Categorias = this.repo.GetCategorias();
-            enlace.Subcategorias = this.repo.GetSubCategorias();
-            if (idproductoAñadir != null)
-            {
-                List<int> carrito;
-                if (HttpContext.Session.GetObject<List<int>>("CARRITO") == null)
-                {
-                    carrito = new List<int>();
-                }
-                else
-                {
-                    carrito = HttpContext.Session.GetObject<List<int>>("CARRITO");
-                }
-                if (carrito.Contains(idproductoAñadir.Value) == false)
-                {
-                    carrito.Add(idproductoAñadir.Value);
-                    HttpContext.Session.SetObject("CARRITO", carrito);
-                }
-
-            }
-            if (idproductoAñadirFav != null)
-            {
-                List<int> favoritos;
-                if (HttpContext.Session.GetObject<List<int>>("FAVORITO") == null)
-                {
-                    favoritos = new List<int>();
-                }
-                else
-                {
-                    favoritos = HttpContext.Session.GetObject<List<int>>("FAVORITO");
-                }
-                if (favoritos.Contains(idproductoAñadirFav.Value) == false)
-                {
-                    favoritos.Add(idproductoAñadirFav.Value);
-                    HttpContext.Session.SetObject("FAVORITO", favoritos);
-                }
-
-            }
-            enlace.Producto = this.repo.DetallesProductos(idproducto);
-            return Ok(enlace);
-        }
-
-        //[AuthorizeClientes]
-        [HttpPost]
-        [Route("[action]")]
-        [Authorize]
-        public ActionResult VistasDetalles(int idproducto, int cantidad, string accion)
-        {
-            if (accion == "AgregarCarrito")
-            {
-                List<int> carrito = HttpContext.Session.GetObject<List<int>>("CARRITO");
-                if (carrito == null)
-                {
-                    carrito = new List<int>();
-                }
-
-                for (int i = 0; i < cantidad; i++)
-                {
-                    carrito.Add(idproducto);
-                }
-
-                HttpContext.Session.SetObject("CARRITO", carrito);
-            }
-            else if (accion == "AgregarFavoritos")
-            {
-                List<int> favoritos = HttpContext.Session.GetObject<List<int>>("FAVORITO");
-                if (favoritos == null)
-                {
-                    favoritos = new List<int>();
-                }
-
-                for (int i = 0; i < cantidad; i++)
-                {
-                    favoritos.Add(idproducto);
-                }
-
-                HttpContext.Session.SetObject("FAVORITO", favoritos);
-            }
-
-            return RedirectToAction("MisVistas");
-        }
-
-
-        #endregion
-
-        #region CARRITO
-        //[AuthorizeClientes]
-        [HttpGet]
-        [Route("[action]")]
-        [Authorize]
-        public ActionResult Carrito(int? idproductoCarrito, int? ideliminar, int? eliminarTodo, int? cantidad)
-        {
-            List<int> carrito = HttpContext.Session.GetObject<List<int>>("CARRITO");
-            if (carrito == null)
-            {
-                return Ok();
-            }
-            else
-            {
-                if (eliminarTodo != null)
-                {
-                    carrito.RemoveAll(id => id == eliminarTodo.Value);
-                    if (carrito.Count == 0)
-                    {
-                        HttpContext.Session.Remove("CARRITO");
-                    }
-                    else
-                    {
-                        HttpContext.Session.SetObject("CARRITO", carrito);
-                    }
-                }
-                else if (ideliminar != null)
-                {
-                    if (cantidad != null)
-                    {
-                        for (int i = 0; i < cantidad.Value; i++)
-                        {
-                            carrito.Remove(ideliminar.Value);
-                        }
-                    }
-                    else
-                    {
-                        carrito.Remove(ideliminar.Value);
-                    }
-
-                    if (carrito.Count == 0)
-                    {
-                        HttpContext.Session.Remove("CARRITO");
-                    }
-                    else
-                    {
-                        HttpContext.Session.SetObject("CARRITO", carrito);
-                    }
-                }
-                else if (idproductoCarrito != null)
-                {
-                    if (cantidad != null)
-                    {
-                        for (int i = 0; i < cantidad.Value; i++)
-                        {
-                            carrito.Add(idproductoCarrito.Value);
-                        }
-                    }
-                    else
-                    {
-                        carrito.Add(idproductoCarrito.Value);
-                    }
-
-                    HttpContext.Session.SetObject("CARRITO", carrito);
-                }
-
-                List<Producto> productos = this.repo.BuscarProductoCarrito(carrito);
-                return Ok(productos);
-            }
-
-            #endregion
-
-        }
     }
-}
+    }
