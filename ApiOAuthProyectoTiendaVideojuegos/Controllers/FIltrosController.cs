@@ -7,11 +7,11 @@ namespace ApiOAuthProyectoTiendaVideojuegos.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class FIltrosController : ControllerBase
+    public class FiltrosController : ControllerBase
     {
         private RepositoryProductos repo;
 
-        public FIltrosController(RepositoryProductos repo)
+        public FiltrosController(RepositoryProductos repo)
         {
             this.repo = repo;
         }
