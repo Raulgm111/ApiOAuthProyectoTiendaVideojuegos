@@ -65,11 +65,11 @@ namespace ApiOAuthProyectoTiendaVideojuegos.Controllers
         }
 
         [HttpPost]
-        [Route("[action]")]
-        public async Task<IActionResult> Register(string nombre, string apellidos, string email, string password, string imagen)
+        [Route("[action]/{nombre}/{apellidos}/{email}/{password}")]
+        public async Task<ActionResult<Cliente>> Register(string nombre, string apellidos, string email, string password)
         {
-            await this.repo.RegisterUsuario(nombre, apellidos, email, password, imagen);
-            return RedirectToAction("MisVistas", "Productos");
+            await this.repo.RegisterUsuario(nombre,apellidos,email,password);
+            return Ok();
         }
     }
 }

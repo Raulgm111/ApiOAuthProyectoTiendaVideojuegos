@@ -261,28 +261,26 @@ namespace ApiOAuthProyectoTiendaVideojuegos.Repositories
 
         private int GetMaxIdUsuario()
         {
-            if (this.context.Clientes.Count() == 0)
-            {
-                return 1;
-            }
-            else
-            {
-                return this.context.Clientes.Max(z => z.IdCliente) + 1;
-            }
+            return this.context.Clientes.Max(x => x.IdCliente) + 1;
         }
 
-        public async Task RegisterUsuario(string nombre, string apellidos, string email, string password, string imagen)
+        public async Task RegisterUsuario(string nombre, string apellidos, string email, string password)
         {
-            Cliente user = new Cliente();
-            user.IdCliente = this.GetMaxIdUsuario();
-            user.Nombre = nombre;
-            user.Apellidos = apellidos;
-            user.Email = email;
-            user.Imagen = imagen;
-            user.Salt = HelperCryptography.GenerateSalt();
-            user.Contraseña = HelperCryptography.EncryptPassword(password, user.Salt);
+            string salt = HelperCryptography.GenerateSalt();
+
+            Cliente user = new Cliente
+            {
+                IdCliente = this.GetMaxIdUsuario(),
+                Nombre = nombre,
+                Apellidos = apellidos,
+                Email = email,
+                Salt = salt,
+                Contraseña = HelperCryptography.EncryptPassword(password, salt)
+            };
+
             this.context.Clientes.Add(user);
             await this.context.SaveChangesAsync();
         }
+
     }
 }
