@@ -71,5 +71,18 @@ namespace ApiOAuthProyectoTiendaVideojuegos.Controllers
             await this.repo.RegisterUsuario(nombre,apellidos,email,password);
             return Ok();
         }
+
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<ActionResult<Cliente>> PerfilUsuario()
+        {
+            Claim claim = HttpContext.User.Claims
+                .SingleOrDefault(x => x.Type == "UserData");
+            string jsonUsuario =
+                claim.Value;
+            Cliente usuario = JsonConvert.DeserializeObject<Cliente>
+                (jsonUsuario);
+            return usuario;
+        }
     }
 }
