@@ -84,7 +84,6 @@ namespace ApiOAuthProyectoTiendaVideojuegos.Controllers
 
         [HttpGet]
         [Route("[action]")]
-        //[Authorize]
         public ActionResult<List<Producto>> BuscarProductoCarrito([FromQuery] List<int>? idproductoCarrito)
         {
             return this.repo.BuscarProductoCarrito(idproductoCarrito);
@@ -92,7 +91,6 @@ namespace ApiOAuthProyectoTiendaVideojuegos.Controllers
 
         [HttpGet]
         [Route("[action]")]
-        //[Authorize]
         public ActionResult<List<Producto>> BuscarProductoFavorito( [FromQuery] List<int> idproductoFav)
         {
             return this.repo.BuscarProductoFavorito(idproductoFav);
@@ -100,7 +98,7 @@ namespace ApiOAuthProyectoTiendaVideojuegos.Controllers
 
         [HttpDelete]
         [Route("[action]/{idproducto}")]
-        //[Authorize]
+        [Authorize]
         public void DeleteProductos(int idproducto)
         {
             this.repo.DeleteProductos(idproducto);
@@ -108,7 +106,7 @@ namespace ApiOAuthProyectoTiendaVideojuegos.Controllers
 
         [HttpPut]
         [Route("[action]")]
-        //[Authorize]
+        [Authorize]
         public void UpdatePorducto(Producto producto)
         {
             this.repo.UpdatePorducto(producto);

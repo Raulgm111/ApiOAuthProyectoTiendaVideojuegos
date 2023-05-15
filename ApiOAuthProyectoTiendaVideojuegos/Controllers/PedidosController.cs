@@ -19,7 +19,6 @@ namespace ApiOAuthProyectoTiendaVideojuegos.Controllers
 
         [HttpPost]
         [Route("[action]/{idCliente}/{precioTotal}")]
-        //[Authorize]
         public void AgregarPedido([FromQuery] List<Producto> productos, int idCliente, int precioTotal, [FromQuery] List<int> cantidad)
         {
             this.repo.AgregarPedido(productos, idCliente, precioTotal, cantidad);
@@ -27,7 +26,6 @@ namespace ApiOAuthProyectoTiendaVideojuegos.Controllers
 
         [HttpGet]
         [Route("[action]/{idcliente}")]
-        //[Authorize]
         public ActionResult<List<DetallesPedido>> MostrarPedidos(int idcliente)
         {
             return this.repo.MostrarPedidos(idcliente);
